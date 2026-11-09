@@ -1,0 +1,30 @@
+{
+  "name": "tiebreak",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Small-group decisions, settled. A vanilla JavaScript polling app.",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "start": "node scripts/dev.js",
+    "build": "node scripts/build.js",
+    "test": "node --test tests/domain.test.js",
+    "test:e2e": "playwright test",
+    "check": "node scripts/check.js",
+    "release:prepare": "npm run build && npm run check && node scripts/stage-site.js"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "dependencies": {
+    "@dicebear/core": "^9.2.4",
+    "@dicebear/micah": "^9.2.4",
+    "@fontsource-variable/gabarito": "^5.3.0",
+    "@fontsource-variable/karla": "^5.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.65.0",
+    "esbuild": "^0.25.12"
+  }
+}

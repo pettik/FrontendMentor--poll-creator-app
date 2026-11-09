@@ -1,0 +1,26 @@
+const paths = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  arrow: '<path d="M5 12h14m-5-5 5 5-5 5"/>',
+  back: '<path d="M19 12H5m5-5-5 5 5 5"/>',
+  chevron: '<path d="m9 5 7 7-7 7"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  people: '<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m3 10v-3a6 6 0 0 0-2-4"/>',
+  chat: '<path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.8-5A9 9 0 1 1 21 11Z"/><path d="M8 10h8m-8 4h5"/>',
+  close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  trophy: '<path d="M8 3h8v6a4 4 0 0 1-8 0V3Zm0 2H4v3a4 4 0 0 0 4 4m8-7h4v3a4 4 0 0 1-4 4m-4 1v6m-5 2h10"/>',
+  spark: '<path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7L12 2Z"/>',
+  link: '<path d="m10 14 4-4m-7 6-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 2 1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(2 0)"/>',
+  logout: '<path d="M9 4H4v16h5m3-8h9m-4-4 4 4-4 4"/>',
+  undo: '<path d="M3 10h11a6 6 0 1 1 0 12M3 10l5-5m-5 5 5 5"/>',
+  alert: '<path d="m12 3 10 18H2L12 3Zm0 5v6m0 3v.5"/>',
+  pizza: '<path d="m3 21 6-18a24 24 0 0 1 12 12L3 21Zm6-18-1 4a19 19 0 0 1 10 9"/><circle cx="9" cy="14" r="1"/><circle cx="13" cy="11" r="1"/>',
+  film: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m10 0h4M3 15h4m10 0h4"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4m8-4v4m-9 8h3m4 0h3"/>',
+  home: '<path d="m2 11 10-9 10 9m-17-3v13h14V8m-10 13v-8h6v8"/>',
+  coffee: '<path d="M4 8h12v9a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8Zm12 1h2a3 3 0 1 1 0 6h-2M7 2v2m5-2v2"/>',
+  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
+};
+export function icon(name, cls = '') { return `<svg class="icon ${cls}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.spark}</svg>`; }
+export const mark = '<svg class="brand-mark" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#e2542c" stroke="currentColor" stroke-width="3"/><path d="m12 20 5 5 11-12" fill="none" stroke="#fff7ea" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';

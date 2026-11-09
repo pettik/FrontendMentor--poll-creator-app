@@ -47,6 +47,10 @@ pnpm-debug.log*
 
 # Test
 coverage/
+test-results/
+playwright-report/
+.sites/
+.site-workflow/
 
 # Misc
 *.tsbuildinfo

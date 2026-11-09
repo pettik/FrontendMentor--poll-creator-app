@@ -1,162 +1,136 @@
-# Tiebreak — Product Challenge
+# Tiebreak
 
-Settle group decisions: polls that live in the group chat, where voters need no account and the reveal feels like the end of a good game.
+Good plans start with a decision. A group polling app built with HTML, CSS, and vanilla JavaScript for the [Frontend Mentor product challenge](https://www.frontendmentor.io/challenges/poll-creator-app).
 
-![Preview of Tiebreak](./preview.jpg)
+**Local guest demo:** [http://localhost:5173/#/guest](http://localhost:5173/#/guest), after `npm run dev`.
 
-*This is a design concept image of one screen (the live results view), not the intended design. There's no Figma file. You make the design decisions.*
+**Deployment status:** the production build is ready in `dist/`. A Sites project was registered, but source upload was declined during this session, so no live deployment is claimed.
 
-## The Challenge
+![Tiebreak dashboard](docs/screenshots/dashboard.png)
 
-Tiebreak is a **Product Challenge** on [Frontend Mentor](https://www.frontendmentor.io). There's no Figma file. You make the design decisions, and you ship a real, deployed product with a database, authentication, and live-updating results. The result is a portfolio piece that shows employers your product thinking and your engineering in one place.
+## The product
 
-The problem: group chats are terrible at decisions. Twenty messages about pizza and no pizza. Polling tools exist, but they're either enterprise survey builders or joyless utilities. Tiebreak is social: share a link anyone can vote on without an account, let voters suggest options the creator didn't think of (approved or declined; your call, house rules), and end with a reveal worth screenshotting back into the chat. **A poll goes from created to decided inside one conversation.**
+This solution takes the specification’s **frontend-only, pass-the-phone path**. A host creates a poll, passes their device around the group, reviews suggestions, and reveals the decision. Polls and votes persist in this browser’s local storage. There are no accounts, remote ballots, databases, or external API requests.
 
-### Four Pillars
+The interface reflects that choice: the share step says “pass the phone”; local links are explicitly labeled as local; portable artifacts are the final text result and PNG share card. A poll URL opened on another device shows an explanatory missing-poll screen.
 
-| Pillar | What It Means for Tiebreak |
-|--------|----------------------------|
-| **Product Thinking** | You design the voter's journey after they tap "Cast my vote", the reveal moment, and the first-run experience — genuine product decisions with no single right answer. You also decide real product rules: what reopening a poll means, where the one-vote line sits for account-less voters. |
-| **Design Taste & Craft** | The brand kit gives you a complete visual direction — or a bar to clear with your own. Honest data viz at small vote counts is a design feature: per-voter tallies, counts beside every percentage, ties handled deliberately. |
-| **AI Collaboration** | The project includes AI context files (`AGENTS.md`, `CLAUDE.md`) that give tools like Claude full project context. Lean into AI across planning, building, and polishing. |
-| **Shipping Real Products** | Deploy to a live URL. Real database, real auth, public no-account pages, live-updating results, and a poll state machine (open → settled → reopened) enforced server-side, not just in the UI. |
+### Included
 
-## What You're Building
+- Landing page, empty workspace, and editable guest workspace seeded with all five supplied polls and 32 votes.
+- Dashboard featuring the earliest-closing poll, open/settled sections, and pending-suggestion counts.
+- Creation with 2–10 distinct options, a local-time deadline, single choice or up-to-N picks, and optional suggestions.
+- Six locally generated DiceBear Micah faces and four background colors.
+- Initially unselected ballot, selection-aware submit button, and explicit final-vote confirmation.
+- Named confirmation, live counts on this device, returning-voter state, and “Pass to next voter”.
+- Named suggestions, private pending items, approval with zero votes, and decline with persistent Undo.
+- Automatic closing, early closing, attribution at the reveal, and confirmed reopening with a new deadline.
+- Honest tied, zero-vote, and one-vote states; counts beside percentages; relative trailing bars.
+- Distinct Copy result, Save image, and Copy local link actions, with clipboard fallback.
+- Confirmed deletion and workspace reset, editable host name, and storage-error feedback.
+- Responsive layouts, native forms and dialogs, deliberate focus management, and status announcements.
 
-A creator makes a poll and pastes the link into the group chat. Voters tap through on their phones, type a name, pick an avatar, and vote — no accounts. They can suggest options; the creator moderates. Results update live and stay honest at small numbers. When voting ends, the winner gets a proper reveal.
+No animation or poll templates are included, as requested.
 
-- **Creator accounts & dashboard** — auth for creators only; open and settled polls at a glance, with the poll that needs attention featured
-- **Poll creation** — freeform title, 2–10 options, a closing time, single vote or pick-up-to-N, done in under a minute
-- **The vote page** — public, no-account, phone-first: name + avatar, an unmistakable selected state, and a vote that's final ("no takebacks")
-- **Suggestions & moderation** — voters propose options; the creator approves ("Add it" — joins with 0 votes) or declines ("Not this time", with undo)
-- **Live results** — a segmented per-voter tally for the leader, pack bars relative to the leader, counts beside every percentage, updates as votes land
-- **Closing & the reveal** — auto-close or end early, attribution revealed at close, a designed winner moment, and reopening (with a confirm)
-- **Landing page & guest mode** — a compelling front door and a one-click "Try as guest" pre-loaded with believable polls
+## Run locally
 
-### The Guest Experience
+Requires Node.js 20.19+ and npm. No environment variables or API keys are needed.
 
-When you share this project — in your portfolio, a job application, or a social post — the person clicking your link isn't going to create an account. Guest mode is what lets them see your work instead of a login wall.
-
-Your landing page includes a "Try as guest" button. Guests enter a demo dashboard pre-loaded from `data/sample-polls.json`: five polls covering a close live race with a pending suggestion, a one-vote lead with a tie behind it, two settled polls, and a fresh zero-vote poll. A dashboard mid-game makes the value obvious in seconds.
-
-## Project Structure
-
-```
-tiebreak/
-├── spec/
-│   ├── product-definition.md      # What, who, why
-│   ├── core-requirements.md       # 14 features: 10 core + 4 stretch
-│   ├── design-challenges.md       # 3 experiences YOU design
-│   ├── technical-requirements.md  # State machine, database, auth, avatars + frontend-only path
-│   └── differentiators.md         # 4 enhancements (pick 1-2)
-├── guidance/
-│   ├── brand-kit.md               # The brand direction: palette roles, type, data-viz rules
-│   ├── patterns.md                # UI/UX do's and don'ts
-│   └── accessibility.md           # WCAG 2.2 AA checklist
-├── starter/
-│   ├── tokens.css                 # CSS custom properties (the brand-kit tokens)
-│   └── tailwind.css               # Optional Tailwind v4 config
-├── data/
-│   ├── sample-polls.json          # 5 polls, 32 votes (the guest dataset, matching preview.jpg)
-│   └── README.md                  # Data shape and the edge case each poll exercises
-├── AGENTS.md                      # AI collaboration context
-├── CLAUDE.md                      # Points to AGENTS.md
-└── README-template.md             # Template for your solution README
+```sh
+npm ci
+npm run dev
 ```
 
-## Getting Started
+Open **http://localhost:5173**. The development server builds and watches source files. Return to saved polls using the same browser and origin.
 
-1. **Read the spec** — Start with `spec/product-definition.md`, then `core-requirements.md`. Understand the two audiences before you write code: the organizer with an account, and the voter who will never make one.
+```sh
+npm run build      # Production files in dist/
+npm test           # Product-rule tests with Node's built-in runner
+npm run check      # JavaScript syntax checks
+npm run test:e2e   # Browser journeys and axe accessibility checks
+```
 
-2. **Review the brand kit** — `guidance/brand-kit.md` gives you the visual direction: cream tabletop, cocoa ink, tangerine/teal/butter with strict jobs, Gabarito over Karla. Use it as your starting point. Or, if you have a clear design vision of your own, create your own brand kit and hold it to the same bar. The starter tokens and optional Tailwind config are ready to use.
+Browser tests use installed Google Chrome in headless mode. Install Chrome or change `channel` in `playwright.config.js` to your installed Playwright browser. `PORT` optionally changes the development port.
 
-3. **Explore the patterns** — `guidance/patterns.md` covers honest live results, the guest vote flow, suggestion moderation, and the traps (results spin, voter friction, celebration creep). Use it to make strong decisions without a Figma file.
+## Design decisions
 
-4. **Choose your stack** — Framework-agnostic. Next.js, Nuxt, SvelteKit, Remix, a Rails or Laravel monolith: whatever you're most productive with. The recommended path is full-stack (database + auth); there's a **frontend-only alternative** (pass-the-phone mode) if you can't take on a backend. See `spec/technical-requirements.md`.
+### The voter's story
 
-5. **Set up your AI workflow** — `AGENTS.md` and `CLAUDE.md` give AI tools full context about the project: specs, guidance, and collaboration approach. We recommend working with AI across every phase: planning, building, and polishing.
+The ballot begins with a name and a preset face. The selected preset, rather than the typed name, determines the avatar; the preview and final vote use the same seed and tint. No ballot choice is preselected.
 
-6. **Pick your differentiators** — Read `spec/differentiators.md` and choose 1-2 that match your interests: truly live results, a generated share card, sudden-death tiebreakers, or poll quick-starts. These are what make the project _yours_.
+Confirmation repeats every chosen option and explains that the vote is final. After voting, the person sees “You’re in, Alex” and their own choice, followed by the current race. This makes the vote feel counted. Other people's choices stay hidden until closing, while aggregate counts are visible.
 
-7. **Start building** — Foundation first (auth, schema, a poll you can create and vote on), then the live results view, suggestions and moderation, and the close/reveal flow. The core-requirements spec is your roadmap; core features give you a solid product, stretch features take it further.
+The turn token persists across refreshes, so returning shows the already-voted state. “Pass to next voter” deliberately creates a fresh token and clears the identity and selections. A late visitor gets the actual result rather than a disabled form.
 
-8. **Document as you go** — Use `README-template.md` for your solution README. Record design decisions, technical trade-offs, and lessons learned as they happen, not after. Give the three design challenges the fullest write-ups.
+### The reveal
 
-## Working with AI
+The live screen uses tangerine for the leader, teal for system actions, and one tick per person for small groups. Closing gives the result more space and reveals the backers of every option. The reveal relies on type, color, and people rather than movement.
 
-Product Challenges are designed for AI collaboration. The `AGENTS.md` and `CLAUDE.md` files give AI tools like Claude, Cursor, and Copilot full project context, including the spec, brand kit, and collaboration guidelines. Load them at the start of each session.
+Tied leaders never get an arbitrary winner. A butter-colored panel states the tie in words; each option keeps its score and backers. With no votes there is no winner. With one vote the live copy says it is too early to call.
 
-Lean on AI for implementation, but don't just accept what it gives you. The design decisions are yours, and so is the code quality: review what gets generated, understand it, and make sure it's something you'd be happy putting your name on. The three design-it-yourself experiences (**the voter's side of the story**, **the reveal**, and **first run**) are where your product thinking matters most. Think those through yourself before you let AI fill in the code.
+**Copy result** contains the question, winner or tied options, counts, percentage where appropriate, total voters, a multi-choice clarification if needed, and “Made with Tiebreak”. It contains no unusable remote voting link. **Copy local link** copies the ballot URL and announces its browser-only scope.
 
-## Your Solution Repo
+**Save image** is the chosen differentiator. Canvas produces a PNG with the question, outcome, exact counts, and backers. Its height grows with long titles and ties. Bundled avatars and fonts avoid cross-origin dependencies.
 
-The `.gitignore` is pre-configured to exclude challenge reference files (`spec/`, `guidance/`, `AGENTS.md`, etc.) from your solution repo. These files are your development reference: they stay on your machine for AI sessions and planning, but they don't belong in the finished product.
+### First run
 
-Your public repo should contain:
+An empty dashboard asks “What are we deciding?” and points directly to a short form. The alternative is the seeded demo, not fake content inside a new personal workspace. After creation, the handoff screen opens the ballot. A zero-vote poll offers the same next action instead of inventing a leader.
 
-- Your application code
-- Your completed README (rename `README-template.md` → `README.md`)
-- The sample data file (`data/sample-polls.json`, needed for the guest experience)
-- The starter tokens (consumed by your build)
+The demo is a local copy: visitors can try moderation, voting, closing, and reopening without changing the supplied JSON. Dates shift relative to first seeding, preserving offsets. Stored polls then follow real time; deadlines do not reset on refresh.
 
-This is how real products work: you reference the spec during development, you ship the product.
+### Product rules
 
-## Learning Outcomes
+| Decision | Behavior |
+| --- | --- |
+| Final votes | No editing or removal of individual votes. Identical token/selection retries are idempotent; changes are rejected. |
+| Reopening | Confirmation and a new future deadline are required. Existing votes and tokens remain. |
+| Deadlines | Stored in UTC; entered/displayed in the device's timezone. Checked on load, mutations, and while open. An expired poll settles at its exact deadline. |
+| Suggestions | Pending → approved/declined. Undo explicitly restores a declined item to pending before approval. |
+| Ballot limit | Maximum ten approved options. Pending suggestions cannot bypass that limit. |
+| Multi-choice | Each person counts once per chosen option. Percentages divide by unique voters and may sum above 100%. |
+| Above 20 voters | Exact counts replace individual ticks; trailing bars remain relative to the leader. |
+| Decline Undo | Notification stays until dismissed, acted on, or replaced. Undo works while the poll is open. |
+| Retention | No automatic deletion. Poll deletion and workspace reset require confirmation. |
 
-By completing this challenge, you'll have demonstrated:
+## Implementation
 
-- Designing and enforcing a real state machine on the server, not just in the UI: polls that open, settle, and reopen; suggestions that move through pending/approved/declined; votes that are final
-- Building public, no-auth pages with per-voter identity and casual duplicate-vote prevention, alongside authenticated creator flows
-- Presenting live, small-n data honestly: per-voter tallies, relative bars, counts beside every percentage, and deliberate tie states
-- Live-updating UI that respects assistive technology: throttled live regions, stable focus, no layout jitter
-- Designing unspecified product moments (post-vote, the reveal, first run) from a brief rather than a mockup, and defending those decisions in writing
-- Deploying a performant, accessible, responsive product to a live URL and reasoning about the trade-offs you made
+| Part | Choice |
+| --- | --- |
+| UI | Semantic HTML, plain JavaScript modules, event delegation |
+| Styling | CSS, supplied semantic tokens, single-column working screens |
+| Type | Self-hosted Gabarito and Karla variable fonts |
+| Storage | Versioned localStorage; counts derived from individual votes |
+| Product rules | Pure functions in `src/domain.js` |
+| Avatars | Bundled `@dicebear/core` and `@dicebear/micah`; data-URI SVGs |
+| Build | esbuild; no application framework or runtime server |
+| Browser checks | Playwright with axe-core |
+| Hosting | Static build ready for deployment; hash routes work on static hosting |
 
-## Key Design Moments
+Modules separate rules, storage, views, interactions, avatar helpers, and share-card rendering. User text is escaped before HTML insertion. Failed storage writes keep the previous workspace intact and leave the ballot available to retry. There is no analytics or remote avatar service.
 
-These screens are where your design taste will be most visible:
+## Validation
 
-1. **The reveal / settled poll** — the hero moment. Voting ends, one option wins, and the screen should feel like the end of a good game. It's the screen people screenshot back into the chat, and it's yours to design, tie state included.
-2. **The public vote page** — the most-visited screen, seen by people who never chose to use Tiebreak. Choosing a face should be fun, voting should be one obvious action, and the whole thing has to feel polished and self-contained on a phone.
-3. **The live results view** — where the data-viz rules pay off. The leader, the tally, the pack, and the pending suggestion need clear hierarchy: one glance answers "who's winning, and is it close?" (`preview.jpg` shows one take; yours can differ.)
+Automated tests cover vote integrity, deadlines, multi-choice limits, moderation and Undo, zero-count approval, open-result attribution, reopening, and sample seeding. Browser journeys cover creation, the physical voting loop, tied reveals, PNG download, refresh persistence, keyboard behavior, and responsive reflow, with axe checks on primary screens.
 
-## Deploying Your Project
+Screenshots are in `docs/screenshots/`. See [QA notes](docs/QA.md) for recorded results and limits. Automated accessibility checks do not replace a real screen-reader test.
 
-Product Challenges require a live, publicly accessible URL. Recommended hosts:
+## Deploying and submitting
 
-- [Vercel](https://vercel.com/)
-- [Netlify](https://www.netlify.com/)
-- [Render](https://render.com/)
-- [Fly.io](https://fly.io/)
+`npm run build` produces static files in `dist/`. Publish its contents on a static host. Hash routes work on GitHub Pages, Netlify, and other hosts without a backend. `.openai/hosting.json` binds this checkout to Sites and contains no credentials.
 
-Make sure your environment variables are configured correctly and no secrets are exposed. Test your deployed URL in an incognito window before submitting, especially the guest experience and the vote page from a real phone (create a poll, text yourself the link, vote from the sofa).
+For Frontend Mentor, deploy `dist/` first, then submit **your public URL followed by `/#/guest`** and [this repository](https://github.com/pettik/FrontendMentor--poll-creator-app). State that this is the frontend-only path. Source changes in this working copy have not been pushed to GitHub. Each deployment origin has separate browser storage; saved polls do not automatically migrate between origins.
 
-For more guidance, see our [hosting guide](https://www.frontendmentor.io/guides/hosting-your-solution).
+The registered Sites project can be reused for a later publication; do not create a second project for the same checkout. Source upload and public access must be completed before treating its reserved URL as a live submission.
 
-## Submitting Your Solution
+## Deliberate limits
 
-Submit your solution on the platform for the rest of the community to see. Follow our [guide to submitting solutions](https://www.frontendmentor.io/guides/how-to-submit-solutions) for the full process.
+This is for a group sharing one trusted device. The host is whoever controls the phone. There is no server authentication or anti-tampering. Someone can deliberately start another turn or edit local data. Remote voting and synchronization between devices require the full-stack path.
 
-When submitting, you'll need:
+Manage a workspace in one tab at a time. Other tabs receive storage updates, but localStorage is not a transactional multi-client database. Clearing site data, changing browsers, or leaving private browsing removes access to local records. Result text and exported PNGs are portable.
 
-- **Live site URL** — Submit the URL to your guest experience (e.g., `your-app.vercel.app/guest`), not the landing page. This ensures our solution reporters analyze your product code rather than the homepage. Test in incognito first.
-- **Repository URL** — A public repo with your solution code and completed README
+There is no automatic 30-day retirement, dark mode, sudden-death round, or template system.
 
-For your retrospective, Product Challenges give you a lot to write about: the reveal design, honest data viz, the no-account voter flow, AI collaboration, technical trade-offs. Be specific about what you're proud of and where you'd like feedback. See our [guide to writing effective retrospectives](https://www.frontendmentor.io/guides/write-an-effective-retrospective) for tips.
+## Collaboration and credits
 
-## Sharing Your Solution
+Built collaboratively with Codex. The developer chose the frontend-only path and a restrained experience without animation or templates. Implementation, tests, responsive fixes, and documentation followed those decisions. This README records the actual rules and limits rather than claiming full-stack features.
 
-Product Challenges create portfolio pieces worth sharing beyond the platform:
-
-1. Share your solution page in the **#finished-projects** channel of our [community](https://www.frontendmentor.io/community).
-2. Post on LinkedIn or X with both your live URL and repo link. The guest experience means anyone clicking your link sees the product immediately. Better yet, run a real poll with your friends first and share the result.
-3. Add it to your portfolio (see our [guide to using challenges in your portfolio](https://www.frontendmentor.io/guides/use-challenges-in-your-portfolio)).
-4. Blog about your experience. The state-machine design, the honest-data-viz rules, and the AI collaboration journey make for compelling content. Great platforms to write on are [dev.to](https://dev.to/), [Hashnode](https://hashnode.com/), and [CodeNewbie](https://community.codenewbie.org/).
-
-## Questions?
-
-If anything in the spec is unclear or you want to discuss the challenge, join our [Discord community](https://www.frontendmentor.io/community).
-
-## Got Feedback for Us?
-
-We love receiving feedback! If you have anything you'd like to mention, please email hi[at]frontendmentor[dot]io.
+Challenge, brand direction, tokens, and sample polls: [Frontend Mentor](https://www.frontendmentor.io). Avatars: [DiceBear Micah](https://www.dicebear.com/styles/micah/), based on Micah Lanier's Avatar Illustration System, **CC BY 4.0**. Gabarito and Karla use the **SIL Open Font License**. See [third-party notices](THIRD_PARTY_NOTICES.md).
