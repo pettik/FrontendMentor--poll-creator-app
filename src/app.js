@@ -1,8 +1,8 @@
 import './styles.css';
 import { icon } from './icons.js';
-import { escape as e, avatar, dateInput, resultText } from './utils.js';
+import { escape as e, avatar, dateInput, resultText, raceSummary } from './utils.js';
 import { createPoll, validateDraft, castVote, suggestOption, moderate, endVoting, reopen, pollView } from './domain.js';
-import { getWorkspace, readWorkspace, saveWorkspace, startWorkspace, updatePoll, reconcile, turnFor, deletePoll, canPersist, wipeWorkspace, hasStoredData } from './storage.js';
+import { getWorkspace, readWorkspace, saveWorkspace, startWorkspace, updatePoll, reconcile, turnFor, deletePoll, canPersist, wipeWorkspace, hasStoredData, getStorageIssue } from './storage.js';
 import * as views from './views.js';
 import { saveShareCard } from './share-card.js';
 
@@ -16,6 +16,10 @@ let dialogAction=null;
 let dialogTrigger=null;
 let toastAction=null;
 let toastTimer;
+let announcementFrame;
+let liveTimer;
+let liveText='';
+let lastLiveAnnouncement=0;
 const drafts=new Map();
 const draftFor=id=>{
   if(!drafts.has(id)) drafts.set(id,{name:'',seed:'Morgan',tint:'cbe2d8',selected:[]});
@@ -23,7 +27,17 @@ const draftFor=id=>{
 };
 const rawPoll=()=>getWorkspace()?.polls.find(p=>p.id===currentId);
 const viewPoll=()=>rawPoll()?pollView(rawPoll()):null;
-function announce(text) { announcer.textContent=''; requestAnimationFrame(()=>{announcer.textContent=text;}); }
+function announce(text) {
+  cancelAnimationFrame(announcementFrame);
+  announcer.textContent='';
+  announcementFrame=requestAnimationFrame(()=>{announcer.textContent=text;});
+}
+function announceRace(text) {
+  liveText=text;
+  if(liveTimer)return;
+  const delay=Math.max(0,4000-(Date.now()-lastLiveAnnouncement));
+  liveTimer=setTimeout(()=>{announce(liveText);lastLiveAnnouncement=Date.now();liveTimer=null;},delay);
+}
 function toast(message,action=null,label='Undo') {
   clearTimeout(toastTimer);toastAction=action;
   toastElement.innerHTML=`<span role="status">${e(message)}</span>${action?`<button type="button" data-toast-action>${e(label)}</button>`:''}<button type="button" data-toast-close aria-label="Dismiss notification">${icon('close')}</button>`;
@@ -40,6 +54,23 @@ function focusHeading(selector) {
   const target=document.querySelector(selector||'main h1')||document.querySelector('main h1');
   if(target) {target.tabIndex=-1;target.focus({preventScroll:true});}
 }
+function captureFocus() {
+  const element=document.activeElement;
+  if(!root.contains(element))return null;
+  let selector;
+  if(element.id)selector=`#${CSS.escape(element.id)}`;
+  else if(element.dataset.action)selector=`[data-action="${CSS.escape(element.dataset.action)}"]${element.dataset.option?`[data-option="${CSS.escape(element.dataset.option)}"]`:''}`;
+  else if(element.name)selector=`[name="${CSS.escape(element.name)}"]${['radio','checkbox'].includes(element.type)?`[value="${CSS.escape(element.value)}"]`:''}`;
+  else if(element.hasAttribute('href'))selector=`a[href="${CSS.escape(element.getAttribute('href'))}"]`;
+  return {selector,start:element.selectionStart,end:element.selectionEnd};
+}
+function restoreFocus(saved) {
+  if(!saved)return;
+  const element=saved.selector?root.querySelector(saved.selector):null;
+  if(!element){focusHeading();return;}
+  element.focus({preventScroll:true});
+  if(typeof saved.start==='number'&&element.setSelectionRange)element.setSelectionRange(saved.start,saved.end);
+}
 function navigate(path) {
   if(location.hash===`#/${path}`) render();
   else location.hash=`#/${path}`;
@@ -49,6 +80,7 @@ function openDialog(title,body,actions='',onSubmit=null) {
   dialogTrigger=document.activeElement;
   dialogAction=onSubmit;
   dialog.innerHTML=views.dialogFrame(title,body,actions,!!onSubmit);
+  dialog.querySelectorAll('input,textarea').forEach(field=>field.setAttribute('aria-describedby',[field.getAttribute('aria-describedby'),'dialog-error'].filter(Boolean).join(' ')));
   dialog.showModal();
   const first=dialog.querySelector('input:not([type="hidden"]),textarea');
   if(first) first.focus();
@@ -56,6 +88,7 @@ function openDialog(title,body,actions='',onSubmit=null) {
 function closeDialog() { if(dialog.open) dialog.close(); }
 dialog.addEventListener('close',()=>{if(dialog.open)return;dialogAction=null;if(dialogTrigger?.isConnected)dialogTrigger.focus({preventScroll:true});});
 dialog.addEventListener('click',event=>{if(event.target.closest('[data-close]'))closeDialog();});
+dialog.addEventListener('input',event=>{event.target.removeAttribute('aria-invalid');setError('dialog-error','');});
 dialog.addEventListener('submit',async event=>{
   event.preventDefault();
   if(!dialogAction)return;
@@ -75,6 +108,7 @@ toastElement.addEventListener('click',async event=>{
 
 function render({focus=true,selector=null}={}) {
   const oldY=scrollY;
+  const savedFocus=!focus&&!selector?captureFocus():null;
   let state=readWorkspace();
   try {reconcile();}catch(error){toast(error.message);}
   state=getWorkspace();
@@ -118,13 +152,14 @@ function render({focus=true,selector=null}={}) {
   document.title=title;
   if(!canPersist()) {
     const note=document.createElement('div');note.className='notice';note.setAttribute('role','alert');
-    note.textContent=hasStoredData()?'Saved data could not be read. Workspace settings can reset this browser’s data.':'This browser cannot save site data. Allow local storage to create polls and keep votes.';
+    note.textContent=getStorageIssue()?.message||'This browser cannot save site data. Allow local storage to create polls and keep votes.';
     if(hasStoredData()&&!state) {const button=document.createElement('button');button.className='button small';button.dataset.action='settings';button.textContent='Workspace settings';note.append(document.createElement('br'),button);}
     root.querySelector('main').prepend(note);
   }
   if(currentPage==='vote')updateCastLabel();
   if(focus) {window.scrollTo(0,0);focusHeading(selector);}
   else if(selector) {focusHeading(selector);window.scrollTo(0,oldY);}
+  else {restoreFocus(savedFocus);window.scrollTo(0,oldY);}
 }
 
 async function copyText(text,message) {
@@ -152,7 +187,7 @@ function settings() {
   openDialog('Your table, your rules.',`<p class="dialog-copy">No account needed. This browser is your workspace, so keep using this device to manage your polls.</p><div class="field"><label for="host-name">Your name</label><input id="host-name" name="hostName" type="text" maxlength="40" value="${e(state.creator.name)}" required/></div><div class="notice">Polls and votes are saved only in this browser. Clearing site data removes them. Save result images before you tidy up.</div><div class="compact-links"><button type="button" class="button text small" data-action="demo">${state.demo?'Reset demo polls':'Explore demo'}</button><button type="button" class="button text small" data-action="reset">Start fresh</button></div>`,`${cancelButton}<button type="submit" class="button dark">Save name</button>`,data=>{
     const name=String(data.get('hostName')).trim();
     if(!name||name.length>40) {dialog.querySelector('#host-name').setAttribute('aria-invalid','true');throw new Error('Add a name, up to 40 characters.');}
-    readWorkspace();saveWorkspace({...getWorkspace(),creator:{...getWorkspace().creator,name}});closeDialog();render({focus:false});toast('Your name is saved.');
+    const workspace=readWorkspace()||startWorkspace(false);saveWorkspace({...workspace,creator:{...workspace.creator,name}});closeDialog();render({focus:false});toast('Your name is saved.');
   });
 }
 function suggestionDialog() {
@@ -184,7 +219,7 @@ async function action(name,trigger) {
     const count=fields.children.length;if(count>=10)return;
     fields.insertAdjacentHTML('beforeend',views.optionField(count));syncOptionFields();fields.lastElementChild.querySelector('input').focus();return;
   }
-  if(name==='remove-option') {const row=trigger.closest('.option-field');const input=row.previousElementSibling?.querySelector('input');row.remove();syncOptionFields();input?.focus();return;}
+  if(name==='remove-option') {const row=trigger.closest('.option-field');const input=row.nextElementSibling?.querySelector('input')||row.previousElementSibling?.querySelector('input');row.remove();syncOptionFields();input?.focus();return;}
   const poll=viewPoll();if(!poll)throw new Error('This poll is no longer on the device.');
   if(name==='next-voter') {turnFor(poll.id,true);drafts.delete(poll.id);render();announce('Ready for the next voter. The ballot has no selections.');return;}
   if(name==='suggest'){suggestionDialog();return;}
@@ -267,9 +302,19 @@ root.addEventListener('submit',event=>{
     for(const key of ['title','options','maxChoices','closesAt'])setError(`${key}-error`,errors[key]);
     form.querySelectorAll('[aria-invalid]').forEach(field=>field.removeAttribute('aria-invalid'));
     if(Object.keys(errors).length) {
-      const key=Object.keys(errors)[0];const field=form.querySelector(key==='options'?'input[name="option"]':`[name="${key}"]`);field?.setAttribute('aria-invalid','true');field?.focus();announce(Object.values(errors).join(' '));return;
+      const invalid=[];
+      for(const key of Object.keys(errors)) {
+        let field=form.querySelector(`[name="${key}"]`);
+        if(key==='options') {
+          const fields=[...form.querySelectorAll('input[name="option"]')];
+          const labels=fields.map(input=>input.value.trim().replace(/\s+/g,' ').toLocaleLowerCase());
+          field=fields.find((input,index)=>!labels[index]||input.value.trim().length>100||labels.indexOf(labels[index])!==index)||fields[0];
+        }
+        if(field){field.setAttribute('aria-invalid','true');invalid.push(field);}
+      }
+      invalid[0]?.focus();announce(Object.values(errors).join(' '));return;
     }
-    try {const poll=createPoll(draft);readWorkspace();saveWorkspace({...getWorkspace(),polls:[...getWorkspace().polls,poll]});navigate(`share/${poll.id}`);toast('Poll created. Time to bring in the crew.');}
+    try {const poll=createPoll(draft);const workspace=readWorkspace()||startWorkspace(false);saveWorkspace({...workspace,polls:[...workspace.polls,poll]});navigate(`share/${poll.id}`);toast('Poll created. Time to bring in the crew.');}
     catch(error){setError('form-error',error.message);}
   }
   if(event.target.id==='vote-form') {
@@ -284,28 +329,34 @@ root.addEventListener('submit',event=>{
     });
   }
 });
-window.addEventListener('hashchange',()=>{closeDialog();toastElement.hidden=true;render();});
+window.addEventListener('hashchange',()=>{clearTimeout(liveTimer);liveTimer=null;closeDialog();toastElement.hidden=true;render();});
 window.addEventListener('storage',event=>{
-  if(event.key!=='tiebreak.workspace.v1')return;
-  if(currentPage==='new'){readWorkspace();announce('Other polls on this device have updated. Your draft is kept.');return;}
+  if(event.key!==null&&event.key!=='tiebreak.workspace.v1')return;
+  if(currentPage==='new'){readWorkspace();announceRace('Other polls on this device have updated. Your draft is kept.');return;}
   readVoteDraft();
-  const active=document.activeElement;const name=active?.getAttribute('name');const position=active?.selectionStart;
   readWorkspace();render({focus:false});
-  const field=name?root.querySelector(`[name="${CSS.escape(name)}"]`):null;
-  if(field){field.focus({preventScroll:true});if(typeof position==='number'&&field.setSelectionRange)field.setSelectionRange(position,position);}
-  announce('The polls on this device have updated.');
+  announceRace(viewPoll()?raceSummary(viewPoll()):'The polls on this device have updated.');
 });
-let lastAnnounced=0;
+root.addEventListener('error',event=>{if(event.target.matches?.('.avatar img'))event.target.remove();},true);
 setInterval(()=>{
   try {
     const priorStatus=rawPoll()?.status;
+    const priorIssue=getStorageIssue()?.kind;
     if(!reconcile())return;
     if(currentPage==='new'||currentPage==='share'||currentPage==='landing')return;
-    if(['poll','vote'].includes(currentPage)&&rawPoll()?.status===priorStatus)return;
-    const active=document.activeElement;
-    const hadFocus=root.contains(active)&&active!==document.body;
-    render({focus:false,selector:hadFocus&&!dialog.open?'main h1':null});
-    if(Date.now()-lastAnnounced>4000){announce('Voting has closed. The final result and the crew’s choices are revealed.');lastAnnounced=Date.now();}
+    if(['poll','vote'].includes(currentPage)&&rawPoll()?.status===priorStatus&&getStorageIssue()?.kind===priorIssue)return;
+    readVoteDraft();render({focus:false});
+    announceRace(viewPoll()?raceSummary(viewPoll()):'Voting has closed. The final results are ready.');
   }catch(error){toast(error.message);}
 },1500);
+function announceVoterState() {
+  if(currentPage!=='vote')return;
+  const poll=viewPoll();if(!poll)return;
+  if(poll.status==='settled'){announce('Voting is closed. The final result and the crew’s choices are revealed.');return;}
+  const token=getWorkspace().turns[poll.id];
+  const vote=rawPoll().votes.find(vote=>vote.voterToken===token);
+  if(vote)announce(`Your vote is already counted, ${vote.voter.name}. It is final. Pass the phone to start the next person’s turn.`);
+}
+window.addEventListener('hashchange',announceVoterState);
 render({focus:false});
+announceVoterState();

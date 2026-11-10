@@ -30,8 +30,15 @@ export function race(poll) {
   return { sorted, top, leaders, tied:leaders.length > 1, margin:top-(sorted[1]?.count || 0) };
 }
 export const percentage = (count, total) => total ? Math.round(count/total*100) : 0;
-export function resultText(poll, url) {
+export function raceSummary(poll) {
+  const {leaders, tied}=race(poll);
+  const total=`${plural(poll.totalVoters)} counted.`;
+  if(!leaders.length)return `${poll.title}. ${poll.status==='settled'?'Voting closed with no votes.':'Waiting for the first vote.'}`;
+  if(tied)return `${poll.title}. ${poll.status==='settled'?'Voting closed. ':''}Tied at ${plural(leaders[0].count)} each. ${total}`;
+  return `${poll.title}. ${leaders[0].label}: ${leaders[0].count} of ${plural(poll.totalVoters)}. ${poll.status==='settled'?'The winner.':poll.totalVoters===1?'The first vote.':'In the lead.'}`;
+}
+export function resultText(poll, url='') {
   const {leaders, tied} = race(poll);
   const summary = !leaders.length ? 'No votes this round.' : tied ? `A tie: ${leaders.map(o=>o.label).join(' & ')} — ${plural(leaders[0].count)} each.` : `${leaders[0].label} wins — ${leaders[0].count} of ${plural(poll.totalVoters)} (${percentage(leaders[0].count,poll.totalVoters)}%).`;
-  return `${poll.title}\n${summary}\n${poll.totalVoters} ${poll.totalVoters===1?'person':'people'} voted.${poll.type==='multi'?' Multi-choice poll.':''}\nMade with Tiebreak\n${url}`;
+  return `${poll.title}\n${summary}\n${poll.totalVoters} ${poll.totalVoters===1?'person':'people'} voted.${poll.type==='multi'?' Multi-choice poll.':''}\nMade with Tiebreak${url?`\n${url}`:''}`;
 }

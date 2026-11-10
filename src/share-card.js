@@ -28,6 +28,7 @@ export async function saveShareCard(poll) {
   const {leaders,tied}=race(poll);
   const canvas=document.createElement('canvas');
   let ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('This browser can’t draw a result image. Copy the result instead.');
   ctx.font='750 40px "Gabarito Variable"';
   const title=wrap(ctx,poll.title,1032);
   ctx.font='750 58px "Gabarito Variable"';
@@ -61,8 +62,10 @@ export async function saveShareCard(poll) {
     for(let i=0;i<displayed.length;i++) {
       const person=displayed[i];
       const uri=createAvatar(micah,{seed:person.avatar.seed,backgroundColor:[person.avatar.tint]}).toDataUri();
-      const img=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=uri;});
-      ctx.save();ctx.beginPath();ctx.arc(146+i*62,y+9,27,0,Math.PI*2);ctx.clip();ctx.drawImage(img,119+i*62,y-18,54,54);ctx.restore();
+      const img=await new Promise(resolve=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>resolve(null);image.src=uri;});
+      ctx.save();ctx.beginPath();ctx.arc(146+i*62,y+9,27,0,Math.PI*2);ctx.clip();
+      ctx.fillStyle=`#${person.avatar.tint}`;ctx.fillRect(119+i*62,y-18,54,54);
+      if(img)ctx.drawImage(img,119+i*62,y-18,54,54);ctx.restore();
       ctx.strokeStyle=colors.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(146+i*62,y+9,27,0,Math.PI*2);ctx.stroke();
     }
     y+=76;

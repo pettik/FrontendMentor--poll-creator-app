@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 async function demo(page) {await page.goto('/#/guest');await expect(page.getByRole('heading',{name:'Your next good plan.'})).toBeVisible();}
 async function noAxeViolations(page) {
+  await page.mouse.move(0,0);
   const results=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']).analyze();
   expect(results.violations).toEqual([]);
 }

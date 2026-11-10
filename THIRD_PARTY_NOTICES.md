@@ -10,6 +10,8 @@ Micah is a remix of **Avatar Illustration System** by **Micah Lanier**, licensed
 
 Tiebreak generates seeded variants with four selected background colors. Avatars are generated locally using DiceBear. The packages retain their own notices in `node_modules`.
 
+The production distribution includes the full DiceBear core and Micah code/design licenses in `licenses/DiceBear-core.txt` and `licenses/DiceBear-micah.txt`. Result images also include attribution to Micah Lanier and DiceBear.
+
 ## Fonts
 
 **Gabarito** and **Karla** are bundled through Fontsource under the SIL Open Font License, Version 1.1.

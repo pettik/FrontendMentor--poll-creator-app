@@ -11,6 +11,8 @@ export async function prepare() {
   await mkdir('dist/licenses',{recursive:true});
   await copyFile('node_modules/@fontsource-variable/gabarito/LICENSE','dist/licenses/Gabarito.txt');
   await copyFile('node_modules/@fontsource-variable/karla/LICENSE','dist/licenses/Karla.txt');
+  await copyFile('node_modules/@dicebear/core/LICENSE','dist/licenses/DiceBear-core.txt');
+  await copyFile('node_modules/@dicebear/micah/LICENSE','dist/licenses/DiceBear-micah.txt');
   await copyFile('THIRD_PARTY_NOTICES.md','dist/licenses/THIRD_PARTY_NOTICES.md');
 }
 export const options = {

@@ -4,7 +4,7 @@ Good plans start with a decision. A group polling app built with HTML, CSS, and 
 
 **Local guest demo:** [http://localhost:5173/#/guest](http://localhost:5173/#/guest), after `npm run dev`.
 
-**Deployment status:** the production build is ready in `dist/`. A Sites project was registered, but source upload was declined during this session, so no live deployment is claimed.
+**Delivery:** a local, frontend-only application. The production build is in `dist/`, and `npm run release:prepare` verifies it and produces `artifacts/tiebreak.zip`. No external server or hosting is needed for development, testing, or packaging.
 
 ![Tiebreak dashboard](docs/screenshots/dashboard.png)
 
@@ -44,12 +44,15 @@ Open **http://localhost:5173**. The development server builds and watches source
 
 ```sh
 npm run build      # Production files in dist/
+npm run preview    # Serve that build on localhost:5173
 npm test           # Product-rule tests with Node's built-in runner
 npm run check      # JavaScript syntax checks
 npm run test:e2e   # Browser journeys and axe accessibility checks
+npm run verify     # Syntax, unit tests, and production browser tests
+npm run release:prepare # Verify, build, and package locally
 ```
 
-Browser tests use installed Google Chrome in headless mode. Install Chrome or change `channel` in `playwright.config.js` to your installed Playwright browser. `PORT` optionally changes the development port.
+Browser tests use installed Google Chrome in headless mode. Set `PLAYWRIGHT_CHANNEL` to use another installed channel, such as `msedge`. `PORT` changes the development/preview port; `TIEBREAK_TEST_PORT` changes the isolated browser-test port (default 5174). All servers bind to **127.0.0.1** and serve only files from this repository. Tests run against the production build.
 
 ## Design decisions
 
@@ -105,7 +108,9 @@ The demo is a local copy: visitors can try moderation, voting, closing, and reop
 | Browser checks | Playwright with axe-core |
 | Hosting | Static build ready for deployment; hash routes work on static hosting |
 
-Modules separate rules, storage, views, interactions, avatar helpers, and share-card rendering. User text is escaped before HTML insertion. Failed storage writes keep the previous workspace intact and leave the ballot available to retry. There is no analytics or remote avatar service.
+Modules separate rules, workspace validation, storage, views, interactions, avatar helpers, and share-card rendering. User text is escaped before HTML insertion. Saved nested records and ballot integrity are checked before rendering. Damaged data stays untouched until an explicit reset.
+
+Failed writes keep the previous workspace intact and leave the ballot available to retry. Deadlines still close the visible ballot if their updated state cannot be saved; persistence is retried when storage is available. Browser-tab updates preserve the current field, selection, and draft. Race announcements are throttled to one meaningful summary per four seconds. There is no analytics or remote avatar service; the loaded app can complete a round offline.
 
 ## Validation
 
@@ -113,13 +118,15 @@ Automated tests cover vote integrity, deadlines, multi-choice limits, moderation
 
 Screenshots are in `docs/screenshots/`. See [QA notes](docs/QA.md) for recorded results and limits. Automated accessibility checks do not replace a real screen-reader test.
 
-## Deploying and submitting
+The [acceptance checklist](docs/REQUIREMENTS.md) maps the brief to the delivered frontend behavior and its verification.
 
-`npm run build` produces static files in `dist/`. Publish its contents on a static host. Hash routes work on GitHub Pages, Netlify, and other hosts without a backend. `.openai/hosting.json` binds this checkout to Sites and contains no credentials.
+## Local handoff and submission
 
-For Frontend Mentor, deploy `dist/` first, then submit **your public URL followed by `/#/guest`** and [this repository](https://github.com/pettik/FrontendMentor--poll-creator-app). State that this is the frontend-only path. Source changes in this working copy have not been pushed to GitHub. Each deployment origin has separate browser storage; saved polls do not automatically migrate between origins.
+`npm run release:prepare` runs verification, builds the static files, and creates `artifacts/tiebreak.zip` with a SHA-256 checksum alongside it. The archive contains the contents of `dist/`, including local fonts, avatars in the JavaScript bundle, and license notices. It contains no credentials, browser workspace data, or server code. The archive is generated entirely in the repository; nothing is uploaded.
 
-The registered Sites project can be reused for a later publication; do not create a second project for the same checkout. Source upload and public access must be completed before treating its reserved URL as a live submission.
+Public hosting is intentionally outside this delivery, as requested. If you later choose to publish it yourself, the ZIP contents can be served by any static host. Hash routes need no application server. For a Frontend Mentor submission, the eventual guest URL should end in `/#/guest`, alongside [this repository](https://github.com/pettik/FrontendMentor--poll-creator-app). State that this is the frontend-only path. A public URL remains a platform submission requirement; the localhost URL cannot serve as one.
+
+Existing `.openai/hosting.json` metadata is retained from earlier setup, but no local script uses it or contacts Sites. Source changes are not automatically committed or pushed. Each origin has separate browser storage; saved polls do not migrate between origins.
 
 ## Deliberate limits
 
