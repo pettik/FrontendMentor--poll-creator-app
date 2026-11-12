@@ -6,6 +6,8 @@ Good plans start with a decision. A group polling app built with HTML, CSS, and 
 
 **Delivery:** a local, frontend-only application. The production build is in `dist/`, and `npm run release:prepare` verifies it and produces `artifacts/tiebreak.zip`. No external server or hosting is needed for development, testing, or packaging.
 
+**Netlify:** the repository includes `netlify.toml` with build command **`npm run build`** and publish directory **`dist`**. For a manual deploy, upload the built **`artifacts/tiebreak.zip`**, not the source repository archive. See the [Netlify setup guide](docs/NETLIFY.md).
+
 ![Tiebreak dashboard](docs/screenshots/dashboard.png)
 
 ## The product
@@ -33,7 +35,7 @@ No animation or poll templates are included, as requested.
 
 ## Run locally
 
-Requires Node.js 20.19+ and npm. No environment variables or API keys are needed.
+Requires Node.js 20.19+ and npm; `.nvmrc` selects Node.js 22 for Netlify and nvm. No environment variables or API keys are needed.
 
 ```sh
 npm ci
@@ -44,6 +46,7 @@ Open **http://localhost:5173**. The development server builds and watches source
 
 ```sh
 npm run build      # Production files in dist/
+npm run package    # Build and create artifacts/tiebreak.zip for Netlify upload
 npm run preview    # Serve that build on localhost:5173
 npm test           # Product-rule tests with Node's built-in runner
 npm run check      # JavaScript syntax checks
@@ -124,7 +127,7 @@ The [acceptance checklist](docs/REQUIREMENTS.md) maps the brief to the delivered
 
 `npm run release:prepare` runs verification, builds the static files, and creates `artifacts/tiebreak.zip` with a SHA-256 checksum alongside it. The archive contains the contents of `dist/`, including local fonts, avatars in the JavaScript bundle, and license notices. It contains no credentials, browser workspace data, or server code. The archive is generated entirely in the repository; nothing is uploaded.
 
-Public hosting is intentionally outside this delivery, as requested. If you later choose to publish it yourself, the ZIP contents can be served by any static host. Hash routes need no application server. For a Frontend Mentor submission, the eventual guest URL should end in `/#/guest`, alongside [this repository](https://github.com/pettik/FrontendMentor--poll-creator-app). State that this is the frontend-only path. A public URL remains a platform submission requirement; the localhost URL cannot serve as one.
+Netlify configuration and a static upload package are provided; actual publication is left to the project owner. For a Git-based deploy, commit and push the configuration changes so Netlify can read them. For a manual deploy, `npm run package` builds the web files without requiring browser tests; upload its ZIP or the `dist/` folder. Hash routes need no application server. For a Frontend Mentor submission, the guest URL should end in `/#/guest`, alongside [this repository](https://github.com/pettik/FrontendMentor--poll-creator-app). State that this is the frontend-only path.
 
 Existing `.openai/hosting.json` metadata is retained from earlier setup, but no local script uses it or contacts Sites. Source changes are not automatically committed or pushed. Each origin has separate browser storage; saved polls do not migrate between origins.
 

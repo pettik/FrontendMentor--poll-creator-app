@@ -2,6 +2,7 @@ import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { createZip } from './archive.js';
+import { validateDist } from './validate-dist.js';
 
 async function collect(directory, prefix = '') {
   const entries = await readdir(directory, {withFileTypes: true});
@@ -14,6 +15,7 @@ async function collect(directory, prefix = '') {
   return files;
 }
 
+await validateDist();
 const files = await collect('dist');
 if (!files.some(file => file.name === 'index.html')) throw new Error('Run npm run build before packaging the app.');
 const archive = createZip(files);

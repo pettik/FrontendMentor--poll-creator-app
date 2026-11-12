@@ -1,0 +1,10 @@
+# Git-based Netlify deploys build in the repository root and publish only the
+# generated static site. No dev server, functions, or browser tests are needed.
+[build]
+  base = "."
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # esbuild is a build-time devDependency, including when NODE_ENV=production.
+  NPM_FLAGS = "--include=dev"

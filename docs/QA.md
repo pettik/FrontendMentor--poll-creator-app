@@ -1,5 +1,16 @@
 # Validation record
 
+## Netlify preparation — 12 November 2026
+
+- Added root `netlify.toml`: build with `npm run build`, publish `dist`, and include esbuild's build-time dependency. `.nvmrc` selects Node.js 22 for Netlify.
+- `npm run package` passed locally on Node.js 20.19.3 and regenerated `artifacts/tiebreak.zip` without requiring Chrome for packaging.
+- The build now validates the published HTML and its eight referenced script, stylesheet, favicon, and font files before declaring success.
+- Python independently parsed the TOML and verified that the ZIP has `index.html` at its root, includes the compiled JS/CSS, matches all 16 `dist/` files, and passes CRC and SHA-256 checks.
+- JavaScript syntax checks and two focused production-browser journeys passed: first-run creation/voting, and cross-tab updates with draft/focus preservation.
+- No Netlify project was created or deployed during this preparation. A build inside Netlify's Linux/Node.js 22 environment and inspection of the actual published URL were not performed. Follow [the Netlify guide](NETLIFY.md) for upload and the post-deploy check.
+
+## Full application baseline
+
 Tested on 10 November 2026 with Node.js 20.19.3 and installed Google Chrome, through Playwright in isolated browser contexts. Browser tests use the production build on a loopback-only server from this repository.
 
 ## Recorded results

@@ -9,11 +9,12 @@
     "start": "node scripts/dev.js",
     "preview": "node scripts/preview.js",
     "build": "node scripts/build.js",
+    "package": "npm run build && node scripts/package.js",
     "test": "node --test tests/domain.test.js tests/workspace.test.js tests/tooling.test.js",
     "test:e2e": "playwright test",
     "check": "node scripts/check.js",
     "verify": "npm run check && npm test && npm run test:e2e",
-    "release:prepare": "npm run verify && npm run build && node scripts/package.js"
+    "release:prepare": "npm run verify && npm run package"
   },
   "engines": {
     "node": ">=20.19.0"

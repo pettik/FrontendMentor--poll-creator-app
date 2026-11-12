@@ -1,5 +1,6 @@
 import { build } from 'esbuild';
 import { mkdir, copyFile, writeFile } from 'node:fs/promises';
+import { validateDist } from './validate-dist.js';
 
 export async function prepare() {
   await mkdir('dist', {recursive:true});
@@ -24,4 +25,6 @@ export const options = {
 if (process.argv[1]?.replaceAll('\\','/').endsWith('/scripts/build.js')) {
   await prepare();
   await build(options);
+  const assets = await validateDist();
+  console.log(`Static publish directory ready: dist (${assets.size} HTML, script, stylesheet, icon, and font files checked).`);
 }
